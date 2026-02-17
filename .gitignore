@@ -1,0 +1,12 @@
+# Python Cache
+__pycache__/
+*.py[cod]
+*.pyo
+
+# IDE & OS Files
+.vscode/
+.idea/
+.DS_Store
+
+# Future Secrets (Crucial to prevent accidentally uploading passwords/keys later)
+.env

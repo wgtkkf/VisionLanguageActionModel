@@ -1,0 +1,37 @@
+
+services:
+  # Service 1: The AI Model Server
+  ollama-server:
+    image: ollama/ollama:latest
+    container_name: ollama-server
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama  # Saves your downloaded models
+    # Uncomment the deploy section below if you are on Linux/Windows and have an NVIDIA GPU
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+  # Service 2: Your Custom App
+  python-app:
+    build:
+      context: .
+      dockerfile: Dockerfile.llama
+    image: llama-app:1.0
+    container_name: llama-app
+    depends_on:
+      - ollama-server  # Ensures the server starts before the app
+    environment:
+      - OLLAMA_HOST=http://ollama-server:11434
+    volumes:
+      - ./:/app
+    command: sleep infinity
+
+volumes:
+  # This tells Docker to create a persistent hard drive for the models
+  ollama_data:
