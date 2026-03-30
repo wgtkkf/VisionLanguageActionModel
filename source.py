@@ -24,7 +24,10 @@ print(response['message']['content'])
 ## run the below
 # Start your stack in the background: docker compose up -d
 # "get inside" by opening a bash shell: docker exec -it my-llama-app bash
-# python3 source.py
+# docker exec -it llama-app python3 source.py
+# Namely...
+# 1. docker compose up -d
+# 2. docker exec -it llama-app python3 source.py
 
 ## build command
 # docker compose up -d --build
