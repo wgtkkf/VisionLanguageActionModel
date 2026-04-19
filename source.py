@@ -1,25 +1,30 @@
 import ollama
 import os
+import time
 
-# Connect to Ollama using the environment variable set by Docker Compose
-host = os.environ.get('OLLAMA_HOST', 'http://localhost:11434')
-client = ollama.Client(host=host)
+from comments import Comments # source code, then class name
+from llama import Llama       # source code, then class name
 
-model_name = 'llama3.2:1b'
+def main():
+    ## start
+    start = time.time()
+    msg = Comments('Calculation started.', 'Calculation completed.')        
+    msg.begin()    
+    ##
 
-print(f"Connecting to {host}...")
-print(f"Checking for {model_name} (It will download automatically if missing)...")
+    lm = Llama(os.environ.get('OLLAMA_HOST', 'http://localhost:11434'), 'llama3.2:1b')
+    lm.ModelInfo()
+    lm.Inference()
 
-# This safely pulls the model if it doesn't exist yet!
-client.pull(model_name)
+    ## end
+    msg.end()                      # message method
+    end = time.time() # time display
+    print(f"### elapsed_time: {end - start:.2f} [sec] ###")
+    ##
 
-print("\nSending prompt to Llama 3.2...")
-response = client.chat(model=model_name, messages=[
-    {'role': 'user', 'content': 'Explain Docker Compose in one short sentence.'}
-])
-
-print("\n--- Llama 3.2 Response ---")
-print(response['message']['content'])
+# --- main routine ---
+if __name__ == '__main__':
+    main()
 
 ## run the below
 # Start your stack in the background: docker compose up -d
