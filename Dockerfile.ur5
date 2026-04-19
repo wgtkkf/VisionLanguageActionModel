@@ -1,0 +1,46 @@
+# Use the official ROS 2 Humble Desktop image
+FROM osrf/ros:humble-desktop
+
+# Set environment variables to avoid interactive prompts during build
+ENV DEBIAN_FRONTEND=noninteractive
+
+# 1. Install necessary core packages and build tools
+RUN apt-get update && apt-get install -y \
+    ros-humble-ur \
+    ros-humble-ros2-control \
+    ros-humble-ros2-controllers \
+    ros-humble-gazebo-ros2-control \
+    python3-colcon-common-extensions \
+    python3-rosdep \
+    python3-vcstool \
+    git \
+    nano \
+    tmux \
+    wget \
+    && rm -rf /var/lib/apt/lists/*
+
+# 2. Create the ROS 2 workspace directory
+WORKDIR /ros2_ws
+
+# 3. Clone the official UR Gazebo simulation repository (Humble branch)
+RUN mkdir src && \
+    cd src && \
+    git clone -b humble https://github.com/UniversalRobots/Universal_Robots_ROS2_Gazebo_Simulation.git
+
+# 4. Resolve and install any missing ROS dependencies using rosdep
+RUN apt-get update && \
+    rosdep init || true && \
+    rosdep update --rosdistro humble && \
+    rosdep install --from-paths src --ignore-src -r -y && \
+    rm -rf /var/lib/apt/lists/*
+
+# 5. Build the workspace
+RUN /bin/bash -c "source /opt/ros/humble/setup.bash && colcon build"
+
+# 6. Source the environments automatically on container startup
+RUN echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc && \
+    echo "source /ros2_ws/install/setup.bash" >> ~/.bashrc && \
+    echo "export GAZEBO_MODEL_DATABASE_URI=http://models.gazebosim.org/" >> ~/.bashrc
+
+# Default entry point
+CMD ["bash"]
