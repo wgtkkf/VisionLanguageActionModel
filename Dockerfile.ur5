@@ -1,46 +1,59 @@
 # Use the official ROS 2 Humble Desktop image
 FROM osrf/ros:humble-desktop
 
-# Set environment variables to avoid interactive prompts during build
-ENV DEBIAN_FRONTEND=noninteractive
+# Set the default shell for ALL future RUN commands
+SHELL ["/bin/bash", "-c"]
 
-# 1. Install necessary core packages and build tools
+# Set environment variables to avoid interactive prompts
+ENV DEBIAN_FRONTEND=noninteractive
+ENV GAZEBO_IGNORE_DEPRECATED_MSG=true
+
+# 1. Install core packages, build tools, and MoveIt
 RUN apt-get update && apt-get install -y \
     ros-humble-ur \
     ros-humble-ros2-control \
     ros-humble-ros2-controllers \
     ros-humble-gazebo-ros2-control \
+    ros-humble-moveit-setup-assistant \
+    x11-apps \
     python3-colcon-common-extensions \
-    python3-rosdep \
-    python3-vcstool \
-    git \
-    nano \
-    tmux \
-    wget \
+    ros-humble-ur-description \
     && rm -rf /var/lib/apt/lists/*
 
-# 2. Create the ROS 2 workspace directory
+# 2. Setup Workspace
 WORKDIR /ros2_ws
 
-# 3. Clone the official UR Gazebo simulation repository (Humble branch)
+# 3. Clone dependencies
 RUN mkdir src && \
     cd src && \
-    git clone -b humble https://github.com/UniversalRobots/Universal_Robots_ROS2_Gazebo_Simulation.git
+    git clone -b humble https://github.com/UniversalRobots/Universal_Robots_ROS2_Gazebo_Simulation.git && \
+    git clone -b humble https://github.com/PickNikRobotics/ros2_robotiq_gripper.git && \
+    git clone -b ros2 https://github.com/tylerjw/serial.git
 
-# 4. Resolve and install any missing ROS dependencies using rosdep
-RUN apt-get update && \
-    rosdep init || true && \
-    rosdep update --rosdistro humble && \
-    rosdep install --from-paths src --ignore-src -r -y && \
-    rm -rf /var/lib/apt/lists/*
+# 4. Install dependencies, skipping tools that aren't in the base repo
+RUN rosdep update && \
+    rosdep install --from-paths src --ignore-src -r -y \
+    --skip-keys "ament_clang_format ament_clang_tidy"
 
-# 5. Build the workspace
-RUN /bin/bash -c "source /opt/ros/humble/setup.bash && colcon build"
+# 5. Build base workspace
+RUN source /opt/ros/humble/setup.bash && colcon build
 
-# 6. Source the environments automatically on container startup
-RUN echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc && \
-    echo "source /ros2_ws/install/setup.bash" >> ~/.bashrc && \
-    echo "export GAZEBO_MODEL_DATABASE_URI=http://models.gazebosim.org/" >> ~/.bashrc
+# 6. Copy your local configuration package
+COPY ./my_robot_moveit_config /ros2_ws/src/my_robot_moveit_config
 
-# Default entry point
+# 7. Final Build: Using symlink-install to ensure files are correctly mapped
+RUN source /opt/ros/humble/setup.bash && \
+    source /ros2_ws/install/setup.bash && \
+    colcon build --symlink-install --packages-select my_robot_moveit_config
+
+# 8. Source environments
+# Create an entrypoint script
+RUN echo '#!/bin/bash' > /entrypoint.sh && \
+    echo 'source /opt/ros/humble/setup.bash' >> /entrypoint.sh && \
+    echo 'source /ros2_ws/install/setup.bash' >> /entrypoint.sh && \
+    echo 'exec "$@"' >> /entrypoint.sh && \
+    chmod +x /entrypoint.sh
+
+# Set the entrypoint
+ENTRYPOINT ["/entrypoint.sh"]
 CMD ["bash"]
