@@ -12,7 +12,8 @@ def generate_launch_description():
     ur_description_dir = FindPackageShare('ur_description')
     
     # Path to the generic UR xacro
-    urdf_xacro_path = PathJoinSubstitution([ur_description_dir, 'urdf', 'ur.urdf.xacro'])
+    #urdf_xacro_path = PathJoinSubstitution([ur_description_dir, 'urdf', 'ur.urdf.xacro'])
+    urdf_xacro_path = os.path.join(package_dir, 'config', 'my_robot.urdf.xacro')
 
     # Robot Description
     robot_description_content = Command([

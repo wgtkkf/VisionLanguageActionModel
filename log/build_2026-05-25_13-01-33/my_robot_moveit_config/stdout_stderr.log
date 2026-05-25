@@ -18,9 +18,9 @@
 -- Build files have been written to: /home/takuro/llama/build/my_robot_moveit_config
 -- Install configuration: ""
 -- Installing: /home/takuro/llama/install/my_robot_moveit_config/share/my_robot_moveit_config/config
+-- Installing: /home/takuro/llama/install/my_robot_moveit_config/share/my_robot_moveit_config/config/my_robot.urdf.xacro
+-- Installing: /home/takuro/llama/install/my_robot_moveit_config/share/my_robot_moveit_config/config/moveit_controllers.yaml
 -- Installing: /home/takuro/llama/install/my_robot_moveit_config/share/my_robot_moveit_config/config/ur5e_with_gripper.srdf
--- Installing: /home/takuro/llama/install/my_robot_moveit_config/share/my_robot_moveit_config/config/controllers.yaml
--- Installing: /home/takuro/llama/install/my_robot_moveit_config/share/my_robot_moveit_config/config/robot_model.urdf
 -- Installing: /home/takuro/llama/install/my_robot_moveit_config/share/my_robot_moveit_config/launch
 -- Installing: /home/takuro/llama/install/my_robot_moveit_config/share/my_robot_moveit_config/launch/moveit.launch.py
 -- Installing: /home/takuro/llama/install/my_robot_moveit_config/share/ament_index/resource_index/package_run_dependencies/my_robot_moveit_config

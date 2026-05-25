@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro" name="ur5e_with_gripper">
+  
+  <xacro:include filename="$(find ur_description)/urdf/ur.urdf.xacro" />
+  
+  <xacro:include filename="$(find my_robot_moveit_config)/urdf/gripper.xacro" />
+
+  <joint name="flange_to_gripper" type="fixed">
+    <parent link="flange"/>
+    <child link="robotiq_85_base_link"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+</robot>
